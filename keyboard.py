@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Test suite:
 
 >>> ac = AutocompleteProvider()
@@ -12,6 +13,8 @@
 >>> print (*th, sep=', ')
 "thing" (2), "that" (2), "thoroughly" (1), "this" (1), "third" (1), "think" (1), "the" (1)
 >>> ac.getWords("foo")
+[]
+>>> ac.getWords("")
 []
 """
 
@@ -52,7 +55,7 @@ class AutocompleteProvider:
 
     def getWords(self, fragment):
         """Returns list of candidates ordered by confidence."""
-        if not self.trie.has_subtrie(fragment):
+        if not fragment or not self.trie.has_subtrie(fragment):
             return []
         results = self.trie.items(prefix=fragment.lower())
         candidates = (Candidate(*item) for item in results)
@@ -67,4 +70,10 @@ class AutocompleteProvider:
             self.trie[word] = confidence
 
 if __name__ == '__main__':
-    pass
+    if len(sys.argv) != 2:
+        sys.exit("usage: keyboard.py training_file")
+    with open(sys.argv[1], 'r') as training_file:
+        ac = AutocompleteProvider(training_file)
+    for line in sys.stdin:
+        candidates = ac.getWords(line.strip())[:4]
+        print(*candidates, sep=', ')
