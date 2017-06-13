@@ -13,7 +13,9 @@
 "thing" (2), "that" (2), "thoroughly" (1), "this" (1), "third" (1), "think" (1), "the" (1)
 """
 
-from collections import namedtuple
+from collections import namedtuple, Counter
+from string import punctuation
+import pygtrie
 
 class Candidate(namedtuple('Candidate', ['confidence', 'word'])):
     def getWord(self):
@@ -33,16 +35,21 @@ class AutocompleteProvider:
 
         If source is provided, it is a file-like object used to train.
         """
+        self.trie = pygtrie.CharTrie()
         if source:
             self.train(source.read())
 
     def getWords(self, fragment):
         """Returns list of candidates ordered by confidence."""
-        pass
+        return sorted(self.trie.values(prefix=fragment), reverse=True)
 
     def train(self, passage):
         """Trains the algorithm with the provided passage."""
-        pass
+        words = (word.strip(punctuation) for word in passage.split())
+        for word, count in Counter(words).items():
+            confidence = self.trie.get(word, 0)
+            confidence += count
+            self.trie[word] = Candidate(confidence, word)
 
 if __name__ == '__main__':
     pass
