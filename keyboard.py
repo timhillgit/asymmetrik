@@ -15,9 +15,11 @@
 
 from collections import namedtuple, Counter
 from string import punctuation
+from functools import total_ordering
 import pygtrie
 
-class Candidate(namedtuple('Candidate', ['confidence', 'word'])):
+@total_ordering
+class Candidate(namedtuple('Candidate', ['word', 'confidence'])):
     def getWord(self):
         """Returns the autocomplete candidate."""
         return self.word
@@ -28,6 +30,12 @@ class Candidate(namedtuple('Candidate', ['confidence', 'word'])):
 
     def __str__(self):
         return '"{self.word}" ({self.confidence})'.format(self=self)
+
+    def __lt__(self, other):
+        try:
+            return (self.confidence, self.word) < (other.confidence, other.word)
+        except AttributeError:
+            return NotImplemented
 
 class AutocompleteProvider:
     def __init__(self, source=None):
@@ -41,7 +49,9 @@ class AutocompleteProvider:
 
     def getWords(self, fragment):
         """Returns list of candidates ordered by confidence."""
-        return sorted(self.trie.values(prefix=fragment.lower()), reverse=True)
+        results = self.trie.items(prefix=fragment.lower())
+        candidates = (Candidate(*item) for item in results)
+        return sorted(candidates, reverse=True)
 
     def train(self, passage):
         """Trains the algorithm with the provided passage."""
@@ -49,7 +59,7 @@ class AutocompleteProvider:
         for word, count in Counter(words).items():
             confidence = self.trie.get(word, 0)
             confidence += count
-            self.trie[word] = Candidate(confidence, word)
+            self.trie[word] = confidence
 
 if __name__ == '__main__':
     pass
