@@ -2,17 +2,20 @@
 
 >>> ac = AutocompleteProvider()
 >>> ac.train("The third thing that I need to tell you is that this thing does not think thoroughly.")
->>> ac.getWords("thi")
-["thing" (2), "think" (1), "third" (1), "this" (1)]
->>> ac.getWords("nee")
-["need" (1)]
->>> ac.getWords("th")
-["that" (2), "thing" (2), "think" (1), "this" (1), "third" (1), "the" (1), "thoroughly" (1)]
+>>> thi = ac.getWords("thi")
+>>> print (*thi, sep=', ')
+"thing" (2), "this" (1), "third" (1), "think" (1)
+>>> nee = ac.getWords("nee")
+>>> print (*nee, sep=', ')
+"need" (1)
+>>> th = ac.getWords("th")
+>>> print (*th, sep=', ')
+"thing" (2), "that" (2), "thoroughly" (1), "this" (1), "third" (1), "think" (1), "the" (1)
 """
 
 from collections import namedtuple
 
-class Candidate(namedtuple('Candidate', ['word', 'confidence'])):
+class Candidate(namedtuple('Candidate', ['confidence', 'word'])):
     def getWord(self):
         """Returns the autocomplete candidate."""
         return self.word
