@@ -41,11 +41,11 @@ class AutocompleteProvider:
 
     def getWords(self, fragment):
         """Returns list of candidates ordered by confidence."""
-        return sorted(self.trie.values(prefix=fragment), reverse=True)
+        return sorted(self.trie.values(prefix=fragment.lower()), reverse=True)
 
     def train(self, passage):
         """Trains the algorithm with the provided passage."""
-        words = (word.strip(punctuation) for word in passage.split())
+        words = (word.lower().strip(punctuation) for word in passage.split())
         for word, count in Counter(words).items():
             confidence = self.trie.get(word, 0)
             confidence += count
