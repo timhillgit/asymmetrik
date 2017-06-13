@@ -11,11 +11,14 @@
 >>> th = ac.getWords("th")
 >>> print (*th, sep=', ')
 "thing" (2), "that" (2), "thoroughly" (1), "this" (1), "third" (1), "think" (1), "the" (1)
+>>> ac.getWords("foo")
+[]
 """
 
 from collections import namedtuple, Counter
 from string import punctuation
 from functools import total_ordering
+import sys
 import pygtrie
 
 @total_ordering
@@ -49,6 +52,8 @@ class AutocompleteProvider:
 
     def getWords(self, fragment):
         """Returns list of candidates ordered by confidence."""
+        if not self.trie.has_subtrie(fragment):
+            return []
         results = self.trie.items(prefix=fragment.lower())
         candidates = (Candidate(*item) for item in results)
         return sorted(candidates, reverse=True)
